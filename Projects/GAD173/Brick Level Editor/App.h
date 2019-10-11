@@ -1,6 +1,9 @@
 #pragma once
 #include "SFML/Graphics.hpp"
 
+const int brickCol = 6;
+const int brickRow = 4;
+
 class App
 {
 private:
@@ -11,15 +14,36 @@ private:
 
 	//other data members here
 
+	//ball variables
 	sf::CircleShape		circle;
 	float				radius;
-	
-	sf::Clock			clock;
-	float				deltaTime;
-	float				time;
+	//sf::Vector2f		initialLaunchVector;
+	float				initialLanchAngle;
+	float				PI;
+	float				speed;
 
 	float				xSpeed;
 	float				ySpeed;
+
+	//paddle variables
+	sf::RectangleShape	paddle;
+	float				paddleWidth;
+	float				paddleHeight;
+	float				paddleSpeed;
+	float				yPaddlePosition;
+
+	//brick variables
+	sf::RectangleShape	bricks[brickCol][brickRow];
+	float				brickWidth;
+	float				brickHeight;
+	float				brickGap;
+	float				xBrickPad;
+	float				yBrickPad;
+	
+	//clock variables
+	sf::Clock			clock;
+	float				deltaTime;
+	float				clockTime;	
 
 	sf::Text			frameTime;
 	sf::Text			totalTime;
