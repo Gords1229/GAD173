@@ -16,6 +16,8 @@ App::~App() {
 }
 
 bool App::Init() {
+	srand(time(NULL));
+	
 	//initialise App data members
 	font.loadFromFile("arial.ttf");
 	frameTime.setFont(font);
