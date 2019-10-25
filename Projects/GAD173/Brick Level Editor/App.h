@@ -39,6 +39,13 @@ private:
 	float				brickGap;
 	float				xBrickPad;
 	float				yBrickPad;
+	bool				isCollidable[brickCol][brickRow];
+
+	//collision variables
+	float				collisionAngle;
+	float				colliderSideAngle;
+	sf::Vector2f		ballCentre;
+	sf::Vector2f		colliderCenter;
 	
 	//clock variables
 	sf::Clock			clock;
