@@ -69,7 +69,7 @@ bool App::Init() {
 		for (int j = 0; j < brickRow; j++) {
 			bricks[i][j].setSize(sf::Vector2f(brickWidth, brickHeight));
 			bricks[i][j].setPosition(xBrickPad + i * (brickWidth + brickGap), yBrickPad + j * (brickHeight + brickGap));
-			isCollidable[i][j] = true;
+			isCollidable[i][j] = rand() % 2;
 		}		
 	}
 
@@ -203,6 +203,29 @@ void App::Draw() {
 void App::HandleEvents() {
 	if (event.type == sf::Event::Closed) {
 		window.close();
+	}
+
+	if (event.type == sf::Event::MouseButtonPressed/* && sf::Mouse::isButtonPressed(sf::Mouse::Left)*/) {
+
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+			//get the local mouse position (relative to a window)
+			sf::Vector2i localPosition = sf::Mouse::getPosition(window);
+			std::cout << "Left Mouse Pressed" << std::endl;
+
+			//check to see if the mouse click positionis in the brick bounds
+			for (int i = 0; i < brickCol; i++) {
+				for (int j = 0; j < brickRow; j++) {
+					if (bricks[i][j].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
+						isCollidable[i][j] = !isCollidable[i][j];
+					}
+				}
+			}
+		}
+
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+			std::cout << "Right Mouse Pressed" << std::endl;
+		}
+		
 	}
 
 	//other keyboard, mouse events
