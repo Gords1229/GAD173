@@ -1,8 +1,12 @@
 #pragma once
+#include <iostream>
+#include <fstream>
+#include <string>
 #include "SFML/Graphics.hpp"
+//using namespace std;
 
-const int brickCol = 6;
-const int brickRow = 4;
+//const int brickCol = 6;
+//const int brickRow = 4;
 
 class App
 {
@@ -13,14 +17,42 @@ private:
 	sf::Font			font;
 
 	//other data members here
+	bool				isplaying;
 
+	//button variables
+	float				buttonWidth;
+	float				buttonHeight;
+	float				buttonGap;
+	sf::Color			buttonTextColour;
+
+	sf::RectangleShape	startButton;
+	sf::Vector2f		startButtonPosition;
+	sf::Text			startButtonText;
+
+	sf::RectangleShape	saveButton;
+	sf::Vector2f		saveButtonPosition;
+	sf::Text			saveButtonText;
+
+	sf::RectangleShape	loadButton;
+	sf::Vector2f		loadButtonPosition;
+	sf::Text			loadButtonText;
+
+	sf::RectangleShape	randomButton;
+	sf::Vector2f		randomButtonPosition;
+	sf::Text			randomButtonText;
+
+	//save data variables
+	std::string			saveData;
+	std::ofstream		writeSaveFile;
+	std::ifstream		readSaveFile;
+	
 	//ball variables
-	sf::CircleShape		circle;
+	sf::CircleShape		ball;
 	float				radius;
-	//sf::Vector2f		initialLaunchVector;
 	float				initialLanchAngle;
+	sf::Vector2f		initialBallPosition;
 	float				PI;
-	float				speed;
+	float				ballSpeed;
 
 	float				xSpeed;
 	float				ySpeed;
@@ -30,16 +62,18 @@ private:
 	float				paddleWidth;
 	float				paddleHeight;
 	float				paddleSpeed;
-	float				yPaddlePosition;
-
+	sf::Vector2f		initialPaddlePosition;
+	
 	//brick variables
-	sf::RectangleShape	bricks[brickCol][brickRow];
+	int					brickColumns;
+	int					brickRows;
+	sf::RectangleShape**bricks;
 	float				brickWidth;
 	float				brickHeight;
 	float				brickGap;
 	float				xBrickPad;
 	float				yBrickPad;
-	bool				isCollidable[brickCol][brickRow];
+	bool**				isCollidable;
 
 	//collision variables
 	float				collisionAngle;
