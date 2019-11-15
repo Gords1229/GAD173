@@ -13,6 +13,9 @@ App::App(const char* title, int screenWidth, int screenHeight, int screenBpp) {
 //destructor
 App::~App() {
 	//release memory
+
+	delete[] bricks;
+	delete[] isCollidable;
 }
 
 bool App::Init() {
@@ -225,9 +228,24 @@ void App::Update() {
 		collisionAngle = abs(atan2(ball.getPosition().y - paddle.getPosition().y, ball.getPosition().x - paddle.getPosition().x));
 
 		if (collisionAngle < PI - colliderSideAngle && collisionAngle > colliderSideAngle) {
+			//check which side the ball hit the paddle (top or bottom) and adjust the ball position accordingly
+			if (ball.getPosition().y > paddle.getPosition().y) {
+				ball.setPosition(ball.getPosition().x, ball.getPosition().y + 0.5f * paddle.getSize().y + radius);
+			}
+			else {
+				ball.setPosition(ball.getPosition().x, ball.getPosition().y - 0.5f * paddle.getSize().y + radius);
+			}
 			ySpeed = -ySpeed;
 		}
 		else {
+			//check which side the ball hit the paddle (left or right) and adjust the ball position accordingly
+			if (ball.getPosition().x > paddle.getPosition().x) {
+				ball.setPosition(paddle.getPosition().x + 0.5f * paddle.getSize().x + paddleSpeed * deltaTime + radius, ball.getPosition().y);
+			}
+			else {
+				ball.setPosition(paddle.getPosition().x - 0.5f * paddle.getSize().x + paddleSpeed * deltaTime + radius, ball.getPosition().y);
+			}
+						
 			xSpeed = -xSpeed;
 		}
 	}
