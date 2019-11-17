@@ -89,12 +89,55 @@ bool App::Init() {
 	}
 
 	//intiialise buttons
-	buttonWidth = 160.0f;
-	buttonHeight = 50.0f;
-	buttonGap = 10.0f;
+	numberOfButtons = 4;
+	buttonNames = new std::string[numberOfButtons]{
+		"START", "SAVE", "LOAD", "RANDOMIZE"
+	};
+
+	if (150.0f * (1.05f * numberOfButtons + 0.05f) > window.getSize().x) {
+		buttonWidth = window.getSize().x / (numberOfButtons * 1.05f + 0.05f);
+	}
+	else {
+		buttonWidth = 150.0f;
+	}
+		
+	buttonHeight = buttonWidth / 3.0f;
+	buttonGap = 0.05f * buttonWidth;
 	buttonTextColour = sf::Color::Black;
 
-	startButtonPosition = sf::Vector2f(window.getSize().x - 4 * (buttonWidth + buttonGap), 0.0f);
+	/*std::cout << "button width " << buttonWidth << std::endl;
+	std::cout << "button height " << buttonHeight << std::endl;
+	std::cout << "button gap " << buttonGap << std::endl;*/
+
+	button = new sf::RectangleShape[numberOfButtons];
+	buttonText = new sf::Text[numberOfButtons];
+
+	for (int i = 0; i < numberOfButtons; i++) {
+		button[i].setSize(sf::Vector2f(buttonWidth, buttonHeight));
+		button[i].setOrigin(sf::Vector2f(0.5f * button[i].getSize().x, 0.5f * button[i].getSize().y));		
+		button[i].setPosition(window.getSize().x - (0.5f * buttonWidth + buttonGap) - (numberOfButtons - 1 - i) * (buttonWidth + buttonGap), 0.5f * buttonHeight);
+
+		
+		buttonText[i].setString(buttonNames[i]);
+		buttonText[i].setFont(font);
+		buttonText[i].setCharacterSize(0.8f * buttonHeight);
+		buttonText[i].setOrigin(sf::Vector2f(0.5f * buttonText[i].getGlobalBounds().width, buttonText[i].getGlobalBounds().height));
+		buttonText[i].setPosition(button[i].getPosition());		
+		buttonText[i].setFillColor(buttonTextColour);
+
+		std::cout << "button[" << i << "] position : text[" << i << "] position -  " << 
+			button[i].getPosition().x << " , " << button[i].getPosition().y << " : " << 
+			buttonText[i].getPosition().x << " , " << buttonText[i].getPosition().y << std::endl;
+
+		if (buttonText[i].getGlobalBounds().width > 0.9f * buttonWidth) {
+			buttonText[i].setScale((0.9f * buttonWidth) / buttonText[i].getGlobalBounds().width, (0.9f * buttonWidth) / buttonText[i].getGlobalBounds().width);
+		}				
+	}
+
+	
+
+
+	/*startButtonPosition = sf::Vector2f(window.getSize().x - 4 * (buttonWidth + buttonGap), 0.0f);
 	saveButtonPosition = sf::Vector2f(window.getSize().x - 3 * (buttonWidth + buttonGap), 0.0f);
 	loadButtonPosition = sf::Vector2f(window.getSize().x - 2 * (buttonWidth + buttonGap), 0.0f);
 	randomButtonPosition = sf::Vector2f(window.getSize().x - (buttonWidth + buttonGap), 0.0f);
@@ -130,7 +173,7 @@ bool App::Init() {
 	startButtonText.setFillColor(buttonTextColour);
 	saveButtonText.setFillColor(buttonTextColour);
 	loadButtonText.setFillColor(buttonTextColour);
-	randomButtonText.setFillColor(buttonTextColour);
+	randomButtonText.setFillColor(buttonTextColour);*/
 
 	//initialise collision variables
 
@@ -263,14 +306,20 @@ void App::Draw() {
 	window.draw(totalTime);
 
 	if (isplaying == false) {
-		window.draw(startButton);
+		
+		for (int i = 0; i < numberOfButtons; i++) {
+			window.draw(button[i]);
+			window.draw(buttonText[i]);
+		}
+		
+		/*window.draw(startButton);
 		window.draw(saveButton);
 		window.draw(loadButton);
 		window.draw(randomButton);
 		window.draw(startButtonText);
 		window.draw(saveButtonText);
 		window.draw(loadButtonText);
-		window.draw(randomButtonText);
+		window.draw(randomButtonText);*/
 	}	
 
 	for (int i = 0; i < brickColumns; i++) {
@@ -318,7 +367,7 @@ void App::HandleEvents() {
 			if (isplaying == false) {
 
 				//mouse click position is in the start button
-				if (startButton.getGlobalBounds().contains(sf::Vector2f(localPosition))) {
+				if (button[0].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 					isplaying = true;
 
 					initialLanchAngle = (rand() % 120 + 30) * PI / 180;
@@ -334,7 +383,7 @@ void App::HandleEvents() {
 				}
 
 				//mouse click position is in the save button
-				if (saveButton.getGlobalBounds().contains(sf::Vector2f(localPosition))) {
+				if (button[1].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 
 					writeSaveFile.open("brickEditorSavaData.txt");
 					if (writeSaveFile.is_open()) {
@@ -353,7 +402,7 @@ void App::HandleEvents() {
 				}
 
 				//mouse click position is in the load button
-				if (loadButton.getGlobalBounds().contains(sf::Vector2f(localPosition))) {
+				if (button[2].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 					readSaveFile.open("brickEditorSavaData.txt");
 					if (readSaveFile.is_open()) {
 
@@ -373,7 +422,7 @@ void App::HandleEvents() {
 				}
 
 				//mouse click position is in the random button
-				if (randomButton.getGlobalBounds().contains(sf::Vector2f(localPosition))) {
+				if (button[3].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 					for (int i = 0; i < brickColumns; i++) {
 						for (int j = 0; j < brickRows; j++) {
 							isCollidable[i][j] = rand() % 2;
