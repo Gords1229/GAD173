@@ -28,7 +28,10 @@ private:
 	sf::Color			buttonTextColour;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> parent of fc1ca0f... tidied up the button code
 	sf::RectangleShape	startButton;
 	sf::Vector2f		startButtonPosition;
 	sf::Text			startButtonText;
