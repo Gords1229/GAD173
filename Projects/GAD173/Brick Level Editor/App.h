@@ -3,6 +3,8 @@
 #include <fstream>
 #include <string>
 #include "SFML/Graphics.hpp"
+#include "SFML/Audio.hpp"
+
 //using namespace std;
 
 //const int brickCol = 6;
@@ -28,23 +30,6 @@ private:
 	float				buttonHeight;
 	float				buttonGap;
 	sf::Color			buttonTextColour;
-
-
-	/*sf::RectangleShape	startButton;
-	sf::Vector2f		startButtonPosition;
-	sf::Text			startButtonText;
-
-	sf::RectangleShape	saveButton;
-	sf::Vector2f		saveButtonPosition;
-	sf::Text			saveButtonText;
-
-	sf::RectangleShape	loadButton;
-	sf::Vector2f		loadButtonPosition;
-	sf::Text			loadButtonText;
-
-	sf::RectangleShape	randomButton;
-	sf::Vector2f		randomButtonPosition;
-	sf::Text			randomButtonText;*/
 
 	//save data variables
 	std::ofstream		writeSaveFile;
@@ -93,6 +78,11 @@ private:
 	sf::Text			frameTime;
 	sf::Text			totalTime;
 
+	////sound variables
+	//sf::Sound			audioSource;
+	//sf::SoundBuffer		brickDestroyed;
+
+
 public:
 	App(const char* title, int screenWidth, int screenHeight, int screenBpp);
 
@@ -103,6 +93,8 @@ public:
 	void Draw();
 	void Update();
 	void Run();
+
+	void CreateBrickArray();
 
 private:
 	//private methods

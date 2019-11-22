@@ -64,34 +64,14 @@ bool App::Init() {
 	brickWidth = 200.0f;
 	brickHeight = 50.0f;
 	brickGap = 20.0f;
-	xBrickPad = (window.getSize().x - brickColumns * brickWidth - (brickColumns -1) * brickGap) / 2;
 	yBrickPad = 100.0f;
 
-	// dynamically allocate memory for an array of pointers to sf::RectangleShape & Booleans
-	bricks = new sf::RectangleShape*[brickColumns];
-	isCollidable = new bool* [brickColumns];
-	// dynamically allocate memory for arrays of sf::RectangleShape & Booleans
-	for (int i = 0; i < brickColumns; ++i) {
-		bricks[i] = new sf::RectangleShape[brickRows];
-		isCollidable[i] = new bool[brickRows];
-	}
-	
-	// initialise and output the 2D array of brick and their isCollidable booleans
-
-
-	for (int i = 0; i < brickColumns; i++) {
-		for (int j = 0; j < brickRows; j++) {
-			bricks[i][j].setSize(sf::Vector2f(brickWidth, brickHeight));
-			bricks[i][j].setOrigin(sf::Vector2f(0.5 * bricks[i][j].getSize().x, 0.5 * bricks[i][j].getSize().y));
-			bricks[i][j].setPosition(xBrickPad + 0.5f * brickWidth + i * (brickWidth + brickGap), yBrickPad + 0.5f * brickHeight + j * (brickHeight + brickGap));
-			isCollidable[i][j] = true;			
-		}		
-	}
+	CreateBrickArray();
 
 	//intiialise buttons
-	numberOfButtons = 4;
+	numberOfButtons = 5;
 	buttonNames = new std::string[numberOfButtons]{
-		"START", "SAVE", "LOAD", "RANDOMIZE"
+		"START", "SAVE", "LOAD", "RANDOMIZE", "RESET"
 	};
 
 	if (150.0f * (1.05f * numberOfButtons + 0.05f) > window.getSize().x) {
@@ -134,47 +114,6 @@ bool App::Init() {
 		}				
 	}
 
-	
-
-
-	/*startButtonPosition = sf::Vector2f(window.getSize().x - 4 * (buttonWidth + buttonGap), 0.0f);
-	saveButtonPosition = sf::Vector2f(window.getSize().x - 3 * (buttonWidth + buttonGap), 0.0f);
-	loadButtonPosition = sf::Vector2f(window.getSize().x - 2 * (buttonWidth + buttonGap), 0.0f);
-	randomButtonPosition = sf::Vector2f(window.getSize().x - (buttonWidth + buttonGap), 0.0f);
-
-	startButtonText.setPosition(window.getSize().x - 4 * (buttonWidth + buttonGap) + buttonGap, buttonGap);
-	saveButtonText.setPosition(window.getSize().x - 3 * (buttonWidth + buttonGap) + buttonGap, buttonGap);
-	loadButtonText.setPosition(window.getSize().x - 2 * (buttonWidth + buttonGap) + buttonGap, buttonGap);
-	randomButtonText.setPosition(window.getSize().x - (buttonWidth + buttonGap) + buttonGap, buttonGap);
-
-	startButton.setPosition(startButtonPosition);
-	saveButton.setPosition(saveButtonPosition);
-	loadButton.setPosition(loadButtonPosition);
-	randomButton.setPosition(randomButtonPosition);
-
-	startButton.setSize(sf::Vector2f(buttonWidth, buttonHeight));
-	saveButton.setSize(sf::Vector2f(buttonWidth, buttonHeight));
-	loadButton.setSize(sf::Vector2f(buttonWidth, buttonHeight));
-	randomButton.setSize(sf::Vector2f(buttonWidth, buttonHeight));
-
-	startButtonText.setString("START");
-	saveButtonText.setString("SAVE");
-	loadButtonText.setString("LOAD");
-	randomButtonText.setString("RANDOMIZE");
-
-	startButtonText.setFont(font);
-	saveButtonText.setFont(font);
-	loadButtonText.setFont(font);
-	randomButtonText.setFont(font);
-	startButtonText.setCharacterSize(24);
-	saveButtonText.setCharacterSize(24);
-	loadButtonText.setCharacterSize(24);
-	randomButtonText.setCharacterSize(24);
-	startButtonText.setFillColor(buttonTextColour);
-	saveButtonText.setFillColor(buttonTextColour);
-	loadButtonText.setFillColor(buttonTextColour);
-	randomButtonText.setFillColor(buttonTextColour);*/
-
 	//initialise collision variables
 
 	return true;
@@ -211,9 +150,7 @@ void App::Update() {
 
 		//ball motion
 		ball.move(xSpeed * deltaTime, ySpeed * deltaTime);
-	}	
-	
-	
+	}		
 	
 	//game logic
 
@@ -302,24 +239,16 @@ void App::Draw() {
 	//draw
 	window.draw(ball);
 	window.draw(paddle);
-	window.draw(frameTime);
-	window.draw(totalTime);
+	window.draw(frameTime);	
 
 	if (isplaying == false) {
+		
+		window.draw(totalTime);
 		
 		for (int i = 0; i < numberOfButtons; i++) {
 			window.draw(button[i]);
 			window.draw(buttonText[i]);
-		}
-		
-		/*window.draw(startButton);
-		window.draw(saveButton);
-		window.draw(loadButton);
-		window.draw(randomButton);
-		window.draw(startButtonText);
-		window.draw(saveButtonText);
-		window.draw(loadButtonText);
-		window.draw(randomButtonText);*/
+		}		
 	}	
 
 	for (int i = 0; i < brickColumns; i++) {
@@ -346,6 +275,7 @@ void App::HandleEvents() {
 		ballSpeed = 0.0f;
 		ball.setPosition(initialBallPosition);
 		paddle.setPosition(initialPaddlePosition);
+		clockTime = 0.0f;
 	}
 
 	if (event.type == sf::Event::MouseButtonPressed/* && sf::Mouse::isButtonPressed(sf::Mouse::Left)*/) {
@@ -429,6 +359,16 @@ void App::HandleEvents() {
 						}
 					}
 				}
+
+				//mouse click position is in the reset button
+				if (button[4].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
+					for (int i = 0; i < brickColumns; i++) {
+						for (int j = 0; j < brickRows; j++) {
+							isCollidable[i][j] = true;
+						}
+					}
+				}
+
 			}			
 		}
 
@@ -449,5 +389,33 @@ void App::Run() {
 		}
 		Update();
 		Draw();
+	}
+}
+
+
+
+void App::CreateBrickArray() {
+	
+	xBrickPad = (window.getSize().x - brickColumns * brickWidth - (brickColumns - 1) * brickGap) / 2;
+
+	// dynamically allocate memory for an array of pointers to sf::RectangleShape & Booleans
+	bricks = new sf::RectangleShape * [brickColumns];
+	isCollidable = new bool* [brickColumns];
+	// dynamically allocate memory for arrays of sf::RectangleShape & Booleans
+	for (int i = 0; i < brickColumns; ++i) {
+		bricks[i] = new sf::RectangleShape[brickRows];
+		isCollidable[i] = new bool[brickRows];
+	}
+
+	// initialise and output the 2D array of brick and their isCollidable booleans
+
+
+	for (int i = 0; i < brickColumns; i++) {
+		for (int j = 0; j < brickRows; j++) {
+			bricks[i][j].setSize(sf::Vector2f(brickWidth, brickHeight));
+			bricks[i][j].setOrigin(sf::Vector2f(0.5 * bricks[i][j].getSize().x, 0.5 * bricks[i][j].getSize().y));
+			bricks[i][j].setPosition(xBrickPad + 0.5f * brickWidth + i * (brickWidth + brickGap), yBrickPad + 0.5f * brickHeight + j * (brickHeight + brickGap));
+			isCollidable[i][j] = true;
+		}
 	}
 }
