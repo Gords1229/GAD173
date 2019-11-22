@@ -22,16 +22,32 @@ private:
 	bool				isplaying;
 
 	//button variables
-	int					numberOfButtons;
-	sf::RectangleShape* button;
-	sf::Text*			buttonText;
-	std::string*		buttonNames;
 	float				buttonWidth;
 	float				buttonHeight;
 	float				buttonGap;
 	sf::Color			buttonTextColour;
 
+<<<<<<< HEAD
+=======
+	sf::RectangleShape	startButton;
+	sf::Vector2f		startButtonPosition;
+	sf::Text			startButtonText;
+
+	sf::RectangleShape	saveButton;
+	sf::Vector2f		saveButtonPosition;
+	sf::Text			saveButtonText;
+
+	sf::RectangleShape	loadButton;
+	sf::Vector2f		loadButtonPosition;
+	sf::Text			loadButtonText;
+
+	sf::RectangleShape	randomButton;
+	sf::Vector2f		randomButtonPosition;
+	sf::Text			randomButtonText;
+
+>>>>>>> parent of fc1ca0f... tidied up the button code
 	//save data variables
+	std::string			saveData;
 	std::ofstream		writeSaveFile;
 	std::ifstream		readSaveFile;
 	
