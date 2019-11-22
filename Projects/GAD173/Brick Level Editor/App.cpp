@@ -70,7 +70,6 @@ bool App::Init() {
 
 	//intiialise buttons
 <<<<<<< HEAD
-<<<<<<< HEAD
 	numberOfButtons = 5;
 	buttonNames = new std::string[numberOfButtons]{
 		"START", "SAVE", "LOAD", "RANDOMIZE", "RESET"
@@ -121,13 +120,6 @@ bool App::Init() {
 	buttonGap = 10.0f;
 	buttonTextColour = sf::Color::Black;
 
-=======
-	buttonWidth = 160.0f;
-	buttonHeight = 50.0f;
-	buttonGap = 10.0f;
-	buttonTextColour = sf::Color::Black;
-
->>>>>>> parent of fc1ca0f... tidied up the button code
 	startButtonPosition = sf::Vector2f(window.getSize().x - 4 * (buttonWidth + buttonGap), 0.0f);
 	saveButtonPosition = sf::Vector2f(window.getSize().x - 3 * (buttonWidth + buttonGap), 0.0f);
 	loadButtonPosition = sf::Vector2f(window.getSize().x - 2 * (buttonWidth + buttonGap), 0.0f);
@@ -165,9 +157,6 @@ bool App::Init() {
 	saveButtonText.setFillColor(buttonTextColour);
 	loadButtonText.setFillColor(buttonTextColour);
 	randomButtonText.setFillColor(buttonTextColour);
-<<<<<<< HEAD
->>>>>>> parent of fc1ca0f... tidied up the button code
-=======
 >>>>>>> parent of fc1ca0f... tidied up the button code
 
 	//initialise collision variables
@@ -299,7 +288,6 @@ void App::Draw() {
 
 	if (isplaying == false) {
 <<<<<<< HEAD
-<<<<<<< HEAD
 		
 		window.draw(totalTime);
 		
@@ -308,8 +296,6 @@ void App::Draw() {
 			window.draw(buttonText[i]);
 		}		
 =======
-=======
->>>>>>> parent of fc1ca0f... tidied up the button code
 		window.draw(startButton);
 		window.draw(saveButton);
 		window.draw(loadButton);
@@ -318,9 +304,6 @@ void App::Draw() {
 		window.draw(saveButtonText);
 		window.draw(loadButtonText);
 		window.draw(randomButtonText);
-<<<<<<< HEAD
->>>>>>> parent of fc1ca0f... tidied up the button code
-=======
 >>>>>>> parent of fc1ca0f... tidied up the button code
 	}	
 
