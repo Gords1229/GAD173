@@ -25,6 +25,15 @@ bool App::Init() {
 	font.loadFromFile("arial.ttf");
 	isplaying = false;
 
+	//initialise sound
+	if (!brickDestroyed.loadFromFile("AlanOw!.wav")) {
+		std::cout << "AlanOw! sound not loaded"<<std::endl;
+	}
+		
+	if (!paddleHit.loadFromFile("ArrowShot_itm_sfx_v1.00.wav")) {
+		std::cout << "ArrowShot_itm_sfx_v1.00 sound not loaded"<<std::endl;
+	}
+
 	//intiialise timers
 	frameTime.setFont(font);
 	frameTime.setCharacterSize(24);
@@ -68,7 +77,7 @@ bool App::Init() {
 
 	CreateBrickArray();
 
-	//intiialise buttons
+	//intialise buttons
 	numberOfButtons = 5;
 	buttonNames = new std::string[numberOfButtons]{
 		"START", "SAVE", "LOAD", "RANDOMIZE", "RESET"
@@ -95,12 +104,12 @@ bool App::Init() {
 	for (int i = 0; i < numberOfButtons; i++) {
 		button[i].setSize(sf::Vector2f(buttonWidth, buttonHeight));
 		button[i].setOrigin(sf::Vector2f(0.5f * button[i].getSize().x, 0.5f * button[i].getSize().y));		
-		button[i].setPosition(window.getSize().x - (0.5f * buttonWidth + buttonGap) - (numberOfButtons - 1 - i) * (buttonWidth + buttonGap), 0.5f * buttonHeight);
+		button[i].setPosition(window.getSize().x - (0.5f * buttonWidth + buttonGap) - (numberOfButtons - 1 - i) * (buttonWidth + buttonGap), 0.5f * buttonHeight + 1);
 
 		
 		buttonText[i].setString(buttonNames[i]);
 		buttonText[i].setFont(font);
-		buttonText[i].setCharacterSize(0.8f * buttonHeight);
+		buttonText[i].setCharacterSize(0.6f * buttonHeight);
 		buttonText[i].setOrigin(sf::Vector2f(0.5f * buttonText[i].getGlobalBounds().width, buttonText[i].getGlobalBounds().height));
 		buttonText[i].setPosition(button[i].getPosition());		
 		buttonText[i].setFillColor(buttonTextColour);
@@ -185,6 +194,8 @@ void App::Update() {
 			if (ball.getGlobalBounds().intersects(bricks[i][j].getGlobalBounds()) && isCollidable[i][j] == true) {
 							
 				isCollidable[i][j] = false;
+				sound.setBuffer(brickDestroyed);
+				sound.play();
 
 				//determining the position of the collision
 				colliderSideAngle = abs(atan2(radius + 0.5f * brickHeight, radius + 0.5f * brickWidth));
@@ -202,6 +213,9 @@ void App::Update() {
 
 	//paddle collision
 	if (ball.getGlobalBounds().intersects(paddle.getGlobalBounds())) {
+
+		sound.setBuffer(paddleHit);
+		sound.play();
 		
 		//determining the position of the collision
 		colliderSideAngle = abs(atan2(radius + 0.5f * paddleHeight, radius + 0.5f * paddleWidth));

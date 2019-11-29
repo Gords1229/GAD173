@@ -78,9 +78,11 @@ private:
 	sf::Text			frameTime;
 	sf::Text			totalTime;
 
-	////sound variables
-	//sf::Sound			audioSource;
-	//sf::SoundBuffer		brickDestroyed;
+	//sound variables
+	sf::Sound				sound;
+	sf::SoundBuffer			brickDestroyed;
+	sf::SoundBuffer			paddleHit;
+	
 
 
 public:
