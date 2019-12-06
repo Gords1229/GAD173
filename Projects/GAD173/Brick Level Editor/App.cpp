@@ -36,6 +36,19 @@ bool App::Init() {
 	font.loadFromFile("arial.ttf");
 	isGame = false;
 
+	//initialise ball count
+	maxBallCount = 3;
+	ballCountIconRadius = 30.0f;
+	ballCountIcon.setRadius(ballCountIconRadius);
+	ballCountIcon.setFillColor(sf::Color::Green);
+	ballCountIcon.setOrigin(sf::Vector2f(ballCountIcon.getRadius(), ballCountIcon.getRadius()));
+	ballCountIcon.setPosition(window.getSize().x - ballCountIconRadius, ballCountIconRadius);
+	ballCountText.setFont(font);
+	ballCountText.setCharacterSize(1.6f * ballCountIconRadius);
+	ballCountText.setFillColor(sf::Color::Black);
+	//ballCountText.setOrigin(0.5f * ballCountText.getGlobalBounds().width, 0.5f * ballCountText.getGlobalBounds().height);
+	ballCountText.setPosition(window.getSize().x - ballCountIconRadius, 0);
+
 	//initialise sound
 	if (!brickDestroyed.loadFromFile("AlanOw!.wav")) {
 		std::cout << "AlanOw! sound not loaded"<<std::endl;
@@ -82,7 +95,7 @@ bool App::Init() {
 	// all power up and hazard IDs must be odd numbers.
 	paddleUpgradeID = 3;
 	paddleUpgradeColour = sf::Color::Blue;
-	paddleUpgradeMaxHits = 10;
+	paddleUpgradeMaxHits = 3;
 	paddleUpgradeHitCounter = 0;
 
 	//initialise bricks
@@ -222,9 +235,48 @@ void App::Update() {
 
 	//bottom collision border detection
 	if (ball.getPosition().y > window.getSize().y - ballRadius) {
-		ball.setPosition(ball.getPosition().x, window.getSize().y - ballRadius);
-		yBallSpeed = -yBallSpeed;
-	}
+		ballCount--;
+		
+		if (ballCount == maxBallCount) {
+			ballCountIcon.setFillColor(brickFullHealthColour);
+			ball.setPosition(initialBallPosition);
+			paddle.setPosition(initialPaddlePosition);
+			initialLanchAngle = (rand() % 120 + 30) * PI / 180;
+			std::cout << "intialLaunchAngle = " << initialLanchAngle * 180 / PI << std::endl;
+			ballSpeed = 500.0f;
+			xBallSpeed = ballSpeed * cos(initialLanchAngle);
+			yBallSpeed = -ballSpeed * sin(initialLanchAngle);
+		}
+		else if (ballCount == 1) {
+			ballCountIcon.setFillColor(brickCriticalHealthColour);
+			ball.setPosition(initialBallPosition);
+			paddle.setPosition(initialPaddlePosition);
+			initialLanchAngle = (rand() % 120 + 30) * PI / 180;
+			std::cout << "intialLaunchAngle = " << initialLanchAngle * 180 / PI << std::endl;
+			ballSpeed = 500.0f;
+			xBallSpeed = ballSpeed * cos(initialLanchAngle);
+			yBallSpeed = -ballSpeed * sin(initialLanchAngle);
+		}
+		else if (ballCount <= 0) {
+			isGame = false;
+			ballSpeed = 0.0f;
+			ball.setPosition(initialBallPosition);
+			paddle.setPosition(initialPaddlePosition);
+			clockTime = 0.0f;
+		}
+		else {
+			ballCountIcon.setFillColor(brickDamagedHealthColour);
+			ball.setPosition(initialBallPosition);
+			paddle.setPosition(initialPaddlePosition);
+			initialLanchAngle = (rand() % 120 + 30) * PI / 180;
+			std::cout << "intialLaunchAngle = " << initialLanchAngle * 180 / PI << std::endl;
+			ballSpeed = 500.0f;
+			xBallSpeed = ballSpeed * cos(initialLanchAngle);
+			yBallSpeed = -ballSpeed * sin(initialLanchAngle);
+		}
+
+		ballCountText.setString(std::to_string(ballCount));
+	}	
 
 	//brick collision
 	for (int i = 0; i < brickColumns; i++) {
@@ -368,17 +420,19 @@ void App::Draw() {
 	//draw
 	window.draw(ball);
 	window.draw(paddle);
-	window.draw(frameTime);	
+	//window.draw(frameTime);	
 
-	if (isGame == false) {
-		
-		window.draw(totalTime);
-		
+	if (isGame == false) {		
 		for (int i = 0; i < numberOfButtons; i++) {
 			window.draw(button[i]);
 			window.draw(buttonText[i]);
 		}		
-	}	
+	}
+	else {
+		window.draw(totalTime);
+		window.draw(ballCountIcon);
+		window.draw(ballCountText);
+	}
 
 	for (int i = 0; i < brickColumns; i++) {
 		for (int j = 0; j < brickRows; j++) {
@@ -424,7 +478,14 @@ void App::HandleEvents() {
 			for (int i = 0; i < brickColumns; i++) {
 				for (int j = 0; j < brickRows; j++) {
 					if (bricks[i][j].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
-						isCollidable[i][j] = !isCollidable[i][j];
+						if (brickID[i][j] % 2 == 1) {
+							brickID[i][j]--;
+						}
+						else {
+							brickID[i][j]++;
+						}
+
+						isCollidable[i][j] = brickID[i][j] % 2;
 					}
 				}
 			}
@@ -434,6 +495,8 @@ void App::HandleEvents() {
 				//mouse click position is in the start button
 				if (button[0].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 					isGame = true;
+
+					ballCount = maxBallCount;
 
 					initialLanchAngle = (rand() % 120 + 30) * PI / 180;
 					std::cout << "intialLaunchAngle = " << initialLanchAngle * 180 / PI << std::endl;
@@ -453,9 +516,11 @@ void App::HandleEvents() {
 					writeSaveFile.open("brickEditorSavaData.txt");
 					if (writeSaveFile.is_open()) {
 
+						writeSaveFile << brickColumns << " " << brickRows << " " << maxBrickHealth <<"\n"; 
+						
 						for (int i = 0; i < brickColumns; i++) {
 							for (int j = 0; j < brickRows; j++) {
-								writeSaveFile << isCollidable[i][j] << " ";
+								writeSaveFile << brickID[i][j] << " ";								
 							}
 						}
 
@@ -471,10 +536,19 @@ void App::HandleEvents() {
 					readSaveFile.open("brickEditorSavaData.txt");
 					if (readSaveFile.is_open()) {
 
+						readSaveFile >> brickColumns;
+						readSaveFile >> brickRows;
+						readSaveFile >> maxBrickHealth;
+
+						CreateBrickArray();
+						
 						while (!readSaveFile.eof()) {
 							for (int i = 0; i < brickColumns; i++) {
 								for (int j = 0; j < brickRows; j++) {
-									readSaveFile >> isCollidable[i][j];
+									readSaveFile >> brickID[i][j];
+									
+									isCollidable[i][j] = brickID[i][j] % 2;
+									brickHealth[i][j] = maxBrickHealth;
 								}
 							}
 						}
@@ -490,7 +564,9 @@ void App::HandleEvents() {
 				if (button[9].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 					for (int i = 0; i < brickColumns; i++) {
 						for (int j = 0; j < brickRows; j++) {
-							isCollidable[i][j] = rand() % 2;
+							brickID[i][j] = rand() % (2 * (numberOfBrickTypes + 1));
+							isCollidable[i][j] = brickID[i][j] % 2;
+							//isCollidable[i][j] = rand() % 2;
 						}
 					}
 				}
@@ -499,7 +575,7 @@ void App::HandleEvents() {
 				if (button[10].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 					for (int i = 0; i < brickColumns; i++) {
 						for (int j = 0; j < brickRows; j++) {
-							isCollidable[i][j] = true;
+							brickID[i][j] = 1;
 						}
 					}
 				}

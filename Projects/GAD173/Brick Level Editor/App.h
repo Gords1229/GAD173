@@ -21,6 +21,12 @@ private:
 	//other data members here
 	bool				isGame;
 	bool				isEditor;
+	int					ballCount;
+	int					maxBallCount;
+	sf::CircleShape		ballCountIcon;
+	/*sf::Color			ballCountIconColour;*/
+	float				ballCountIconRadius;
+	sf::Text			ballCountText;
 
 	//button variables
 	int					numberOfButtons;
