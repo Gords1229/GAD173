@@ -154,6 +154,9 @@ private:
 	sf::SoundBuffer			paddleHit;
 	sf::SoundBuffer			paralyzedSound;
 	sf::SoundBuffer			biggerSound;
+	sf::SoundBuffer			smallerSound;
+	sf::SoundBuffer			buttonSound;
+	sf::SoundBuffer			solidHitSound;
 	
 
 

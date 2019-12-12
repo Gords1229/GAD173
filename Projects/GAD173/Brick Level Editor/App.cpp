@@ -79,8 +79,28 @@ bool App::Init() {
 		std::cout << "AlanOw! sound not loaded"<<std::endl;
 	}
 		
-	if (!paddleHit.loadFromFile("ArrowShot_itm_sfx_v1.00.wav")) {
+	if (!paddleHit.loadFromFile("paddleHit.wav")) {
 		std::cout << "ArrowShot_itm_sfx_v1.00 sound not loaded"<<std::endl;
+	}
+
+	if (!paralyzedSound.loadFromFile("paralyzedSFX.wav")) {
+		std::cout << "ArrowShot_itm_sfx_v1.00 sound not loaded" << std::endl;
+	}
+
+	if (!buttonSound.loadFromFile("buttonSFX.wav")) {
+		std::cout << "ArrowShot_itm_sfx_v1.00 sound not loaded" << std::endl;
+	}
+
+	if (!solidHitSound.loadFromFile("solidHitSFX.wav")) {
+		std::cout << "ArrowShot_itm_sfx_v1.00 sound not loaded" << std::endl;
+	}
+
+	if (!smallerSound.loadFromFile("smallSFX.wav")) {
+		std::cout << "ArrowShot_itm_sfx_v1.00 sound not loaded" << std::endl;
+	}
+
+	if (!biggerSound.loadFromFile("bigSFX.wav")) {
+		std::cout << "ArrowShot_itm_sfx_v1.00 sound not loaded" << std::endl;
 	}
 
 	//initialise timers
@@ -352,8 +372,13 @@ void App::Update() {
 
 			paddleStunTimer -= deltaTime;
 
+			/*sound.setBuffer(paralyzedSound);
+			sound.play();*/
+
 			if (paddleStunTimer <= 0.0f) {
 				paddleParalyzed = false;
+
+				//sound.stop();
 			}
 		}
 
@@ -366,18 +391,27 @@ void App::Update() {
 		if (ball.getPosition().x < ballRadius) {
 			ball.setPosition(ballRadius, ball.getPosition().y);
 			xBallSpeed = -xBallSpeed;
+
+			sound.setBuffer(solidHitSound);
+			sound.play();
 		}
 
 		//right collision border detection
 		if (ball.getPosition().x > window.getSize().x - ballRadius) {
 			ball.setPosition(window.getSize().x - ballRadius, ball.getPosition().y);
 			xBallSpeed = -xBallSpeed;
+
+			sound.setBuffer(solidHitSound);
+			sound.play();
 		}
 
 		//top collision border detection
 		if (ball.getPosition().y < ballRadius) {
 			ball.setPosition(ball.getPosition().x, ballRadius);
 			yBallSpeed = -yBallSpeed;
+
+			sound.setBuffer(solidHitSound);
+			sound.play();
 		}
 
 		//bottom collision border detection
@@ -473,6 +507,10 @@ void App::Update() {
 						sound.setBuffer(brickDestroyed);
 						sound.play();
 					}
+					else {
+						sound.setBuffer(solidHitSound);
+						sound.play();
+					}
 
 					if (brickID[i][j] == paralyzerID && paralyzerActive[i][j] == false && paddleParalyzed == false) {
 						paralyzerActive[i][j] = true;
@@ -538,6 +576,11 @@ void App::Update() {
 
 			if (paddleUpgradeHitCounter > 0) {
 				paddleUpgradeHitCounter--;
+
+				if (paddleUpgradeHitCounter == 0) {
+					sound.setBuffer(smallerSound);
+					sound.play();
+				}
 			}
 			else {
 				paddle.setSize(sf::Vector2f(paddleWidth, paddleHeight));
@@ -604,6 +647,9 @@ void App::Update() {
 			for (int j = 0; j < brickRows; j++) {
 				if (paddleUpgrade[i][j].getGlobalBounds().intersects(paddle.getGlobalBounds())) {
 					//paddle.setScale(2.0f, 1.0f);
+					sound.setBuffer(biggerSound);
+					sound.play();
+
 					paddleUpgrade[i][j].setPosition(-100, -100);
 					paddle.setSize(sf::Vector2f(2 * paddleWidth, paddleHeight));
 					paddle.setOrigin(sf::Vector2f(0.5 * paddle.getSize().x, 0.5 * paddle.getSize().y));
@@ -616,6 +662,9 @@ void App::Update() {
 				if (paralyzer[i][j].getGlobalBounds().intersects(paddle.getGlobalBounds())) {
 					paddleParalyzed = true;
 					paralyzerActive[i][j] = false;
+
+					sound.setBuffer(paralyzedSound);
+					sound.play();
 
 					std::cout << "paddle is paralyzed " << paddleParalyzed << std::endl;
 				}
@@ -805,6 +854,10 @@ void App::HandleEvents() {
 					//mouse click position is in the start button
 					if (button[0].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 						isGame = true;
+
+						sound.setBuffer(buttonSound);
+						sound.play();
+
 						writeSaveFile.open("tempSaveData.txt");
 						if (writeSaveFile.is_open()) {
 
@@ -826,6 +879,9 @@ void App::HandleEvents() {
 
 					//mouse click position is in the save button
 					if (button[1].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
+
+						sound.setBuffer(buttonSound);
+						sound.play();
 
 						writeSaveFile.open(targetFile);
 						if (writeSaveFile.is_open()) {
@@ -931,6 +987,9 @@ void App::HandleEvents() {
 						if (menuButtons[0][0].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							targetFile = level1Save;
 
+							sound.setBuffer(buttonSound);
+							sound.play();
+
 							LoadLevel();
 
 							isGame = true;
@@ -940,6 +999,9 @@ void App::HandleEvents() {
 						//mouse click position is in the LEVEL 2
 						if (menuButtons[0][1].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							targetFile = level2Save;
+
+							sound.setBuffer(buttonSound);
+							sound.play();
 
 							LoadLevel();
 
@@ -951,6 +1013,9 @@ void App::HandleEvents() {
 						if (menuButtons[0][2].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							targetFile = level3Save;
 
+							sound.setBuffer(buttonSound);
+							sound.play();
+
 							LoadLevel();
 
 							isGame = true;
@@ -961,6 +1026,9 @@ void App::HandleEvents() {
 						if (menuButtons[1][0].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							targetFile = custom1Save;
 
+							sound.setBuffer(buttonSound);
+							sound.play();
+
 							LoadLevel();
 							isEditor = true;
 						}
@@ -968,6 +1036,9 @@ void App::HandleEvents() {
 						//mouse click position is in the CUSTOM 2
 						if (menuButtons[1][1].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							targetFile = custom2Save;
+
+							sound.setBuffer(buttonSound);
+							sound.play();
 
 							LoadLevel();
 							isEditor = true;
@@ -977,6 +1048,9 @@ void App::HandleEvents() {
 						if (menuButtons[1][2].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							targetFile = custom3Save;
 
+							sound.setBuffer(buttonSound);
+							sound.play();
+
 							LoadLevel();
 							isEditor = true;
 						}
@@ -984,6 +1058,9 @@ void App::HandleEvents() {
 						//mouse click position is in the intructions button
 						if (instructionButton.getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							instructionsOn = true;
+
+							sound.setBuffer(buttonSound);
+							sound.play();
 						}
 					}
 					else {
