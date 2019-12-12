@@ -21,12 +21,25 @@ private:
 	//other data members here
 	bool				isGame;
 	bool				isEditor;
+	bool				createdBricks;
 	int					ballCount;
 	int					maxBallCount;
 	sf::CircleShape		ballCountIcon;
 	/*sf::Color			ballCountIconColour;*/
 	float				ballCountIconRadius;
 	sf::Text			ballCountText;
+
+	//menu button variables
+	int					numberOfSaves;
+	sf::RectangleShape**menuButtons;
+	sf::Text**			menuButtonText;
+	float				menuButtonWidth;
+	float				menuButtonHeight;
+	float				menuButtonGap;
+	sf::Color			menuButtonTextColour;
+	sf::RectangleShape	instructionButton;
+	sf::Text			instructionButtonText;
+	bool				instructionsOn;
 
 	//button variables
 	int					numberOfButtons;
@@ -38,9 +51,21 @@ private:
 	float				buttonGap;
 	sf::Color			buttonTextColour;
 
+	//notes variables
+	sf::Text			editorInstructionText;
+	sf::Text			gameInstructionText;
+	sf::Text			gameTitleText;
+
 	//save data variables
 	std::ofstream		writeSaveFile;
 	std::ifstream		readSaveFile;
+	std::string			targetFile;
+	std::string			level1Save;
+	std::string			level2Save;
+	std::string			level3Save;
+	std::string			custom1Save;
+	std::string			custom2Save;
+	std::string			custom3Save;
 	
 	//ball variables
 	sf::CircleShape		ball;
@@ -49,7 +74,7 @@ private:
 	sf::Vector2f		initialBallPosition;
 	float				PI;
 	float				ballSpeed;
-	float				ballSpeedModifier;
+	//float				ballSpeedModifier;
 	float				xBallSpeed;
 	float				yBallSpeed;
 
@@ -60,6 +85,7 @@ private:
 	float				paddleSpeed;
 	float				defaultPaddleSpeed;
 	sf::Vector2f		initialPaddlePosition;
+	bool				paddleParalyzed;
 	
 	//brick variables
 	int					brickColumns;
@@ -82,25 +108,37 @@ private:
 	sf::Color			brickFullHealthColour;
 	sf::Color			brickDamagedHealthColour;
 	sf::Color			brickCriticalHealthColour;
+	sf::Color			solidBrickColour;
 	bool**				isCollidable;
 	int**				brickID;
+	int					colouredBricksRemaining;
 	
 	//power up and hazard brick variables
 	int					numberOfBrickTypes;
 	float				powerUpFallSpeed;
-	sf::CircleShape**	paddleUpgrade;
+
+	sf::CircleShape**	paddleUpgrade;	
 	sf::Color			paddleUpgradeColour;
 	int					paddleUpgradeHitCounter;
 	int					paddleUpgradeMaxHits;
+
+	sf::CircleShape**	paralyzer;
+	sf::Color			paralyzerColour;
+	float**				paralyzerLaunchAngle;
+	int					paralyzerStunTime;
+	int					paddleStunTimer;
+	bool**				paralyzerActive;
+	
 	// all power up and hazard IDs must be odd numbers.
 	int					paddleUpgradeID;
-	
+	int					solidBrickID;
+	float				paralyzerID;
 
 	//collision variables
 	float				collisionAngle;
 	float				colliderSideAngle;
 	sf::Vector2f		ballCentre;
-	sf::Vector2f		colliderCenter;
+	sf::Vector2f		colliderCenter;	
 	
 	//clock variables
 	sf::Clock			clock;
@@ -114,6 +152,8 @@ private:
 	sf::Sound				sound;
 	sf::SoundBuffer			brickDestroyed;
 	sf::SoundBuffer			paddleHit;
+	sf::SoundBuffer			paralyzedSound;
+	sf::SoundBuffer			biggerSound;
 	
 
 
@@ -129,6 +169,8 @@ public:
 	void Run();
 
 	void CreateBrickArray();
+	void LoadLevel();
+	void StartGame();
 
 private:
 	//private methods
