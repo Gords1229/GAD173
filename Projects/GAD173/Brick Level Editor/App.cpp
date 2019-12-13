@@ -47,6 +47,14 @@ App::~App() {
 
 bool App::Init() {
 	srand(time(NULL));
+
+	music.stop();
+	if (!music.openFromFile("ThemeMusic_mui_mus_2.00.wav")) {
+		std::cout << "ThemeMusic not loaded" << std::endl;
+	}
+	music.setVolume(80.0f);
+	music.setLoop(true);
+	music.play();
 	
 	//initialise App data members
 	font.loadFromFile("arial.ttf");
@@ -101,6 +109,14 @@ bool App::Init() {
 
 	if (!biggerSound.loadFromFile("bigSFX.wav")) {
 		std::cout << "ArrowShot_itm_sfx_v1.00 sound not loaded" << std::endl;
+	}
+
+	if (!backButtonSound.loadFromFile("backButton.wav")) {
+		std::cout << "backButton sound not loaded" << std::endl;
+	}
+	
+	if (!lostBallSound.loadFromFile("lostBallSFX.wav")) {
+		std::cout << "lostBallSFX sound not loaded" << std::endl;
 	}
 
 	//initialise timers
@@ -392,8 +408,8 @@ void App::Update() {
 			ball.setPosition(ballRadius, ball.getPosition().y);
 			xBallSpeed = -xBallSpeed;
 
-			sound.setBuffer(solidHitSound);
-			sound.play();
+			soundSourceSolidHit.setBuffer(solidHitSound);
+			soundSourceSolidHit.play();
 		}
 
 		//right collision border detection
@@ -401,8 +417,8 @@ void App::Update() {
 			ball.setPosition(window.getSize().x - ballRadius, ball.getPosition().y);
 			xBallSpeed = -xBallSpeed;
 
-			sound.setBuffer(solidHitSound);
-			sound.play();
+			soundSourceSolidHit.setBuffer(solidHitSound);
+			soundSourceSolidHit.play();
 		}
 
 		//top collision border detection
@@ -410,13 +426,16 @@ void App::Update() {
 			ball.setPosition(ball.getPosition().x, ballRadius);
 			yBallSpeed = -yBallSpeed;
 
-			sound.setBuffer(solidHitSound);
-			sound.play();
+			soundSourceSolidHit.setBuffer(solidHitSound);
+			soundSourceSolidHit.play();
 		}
 
 		//bottom collision border detection
 		if (ball.getPosition().y > window.getSize().y - ballRadius) {
 			ballCount--;
+
+			soundSourceSolidHit.setBuffer(lostBallSound);
+			soundSourceSolidHit.play();
 
 			if (ballCount == maxBallCount) {
 				ballCountIcon.setFillColor(brickFullHealthColour);
@@ -442,6 +461,14 @@ void App::Update() {
 			}
 			else if (ballCount <= 0) {
 				isGame = false;
+
+				music.stop();
+				if (!music.openFromFile("ThemeMusic_mui_mus_2.00.wav")) {
+					std::cout << "ThemeMusic not loaded" << std::endl;
+				}
+				music.setLoop(true);
+				music.play();
+
 				ballSpeed = 0.0f;
 				ball.setPosition(initialBallPosition);
 				paddle.setPosition(initialPaddlePosition);
@@ -502,14 +529,20 @@ void App::Update() {
 
 						if (brickHealth[i][j] == 0) {
 							colouredBricksRemaining--;
-						}
 
-						sound.setBuffer(brickDestroyed);
-						sound.play();
+							soundSourceBrickDestroy.setBuffer(brickDestroyed);
+							soundSourceBrickDestroy.setPitch(1.2f);
+							soundSourceBrickDestroy.play();
+						}
+						else {
+							soundSourceBrickDestroy.setBuffer(brickDestroyed);
+							soundSourceBrickDestroy.setPitch(1.0f);
+							soundSourceBrickDestroy.play();
+						}						
 					}
 					else {
-						sound.setBuffer(solidHitSound);
-						sound.play();
+						soundSourceSolidHit.setBuffer(solidHitSound);
+						soundSourceSolidHit.play();
 					}
 
 					if (brickID[i][j] == paralyzerID && paralyzerActive[i][j] == false && paddleParalyzed == false) {
@@ -571,21 +604,26 @@ void App::Update() {
 		//paddle collision
 		if (ball.getGlobalBounds().intersects(paddle.getGlobalBounds())) {
 
-			sound.setBuffer(paddleHit);
-			sound.play();
+			soundSourcePaddleHit.setBuffer(paddleHit);
+			soundSourcePaddleHit.play();
 
 			if (paddleUpgradeHitCounter > 0) {
+				std::cout << paddleUpgradeHitCounter << "counter" << std::endl;
 				paddleUpgradeHitCounter--;
 
 				if (paddleUpgradeHitCounter == 0) {
-					sound.setBuffer(smallerSound);
-					sound.play();
+					soundSourceBigger.setBuffer(smallerSound);
+					soundSourceBigger.play();
+
+					yBallSpeed = -yBallSpeed;
+
+					paddle.setSize(sf::Vector2f(paddleWidth, paddleHeight));
+					paddle.setOrigin(sf::Vector2f(0.5 * paddle.getSize().x, 0.5 * paddle.getSize().y));
 				}
 			}
-			else {
-				paddle.setSize(sf::Vector2f(paddleWidth, paddleHeight));
-				paddle.setOrigin(sf::Vector2f(0.5 * paddle.getSize().x, 0.5 * paddle.getSize().y));
-			}
+			/*else {
+				
+			}*/
 
 			//determining the position of the collision
 			colliderSideAngle = abs(atan2(ballRadius + 0.5f * paddle.getSize().y, ballRadius + 0.5f * paddle.getSize().x));
@@ -605,10 +643,11 @@ void App::Update() {
 					xBallSpeed += 0.1f * paddleSpeed;
 				}				
 				else if (xBallSpeed / abs(xBallSpeed) == paddleSpeed / abs(paddleSpeed) && abs(xBallSpeed) <= 0.8f * defaultPaddleSpeed) {
-					xBallSpeed += (xBallSpeed / abs(xBallSpeed)) * 0.5f * (abs(paddleSpeed) - abs(xBallSpeed));
+					xBallSpeed += (xBallSpeed / abs(xBallSpeed)) * 0.5f * (abs(0.8f * paddleSpeed) - abs(xBallSpeed));
 				}
-				else {
-					xBallSpeed += -(xBallSpeed / abs(xBallSpeed)) * 0.5f * (abs(paddleSpeed) - abs(xBallSpeed));
+				else if (xBallSpeed / abs(xBallSpeed) == -(paddleSpeed / abs(paddleSpeed))) {
+					//xBallSpeed += -(xBallSpeed / abs(xBallSpeed)) * 0.5f * (abs(paddleSpeed) - abs(xBallSpeed));
+					xBallSpeed *= 0.5f;
 				}
 
 				// For the ball x directional speed modifier, if the paddle speed is not 0,
@@ -647,13 +686,13 @@ void App::Update() {
 			for (int j = 0; j < brickRows; j++) {
 				if (paddleUpgrade[i][j].getGlobalBounds().intersects(paddle.getGlobalBounds())) {
 					//paddle.setScale(2.0f, 1.0f);
-					sound.setBuffer(biggerSound);
-					sound.play();
+					soundSourceBigger.setBuffer(biggerSound);
+					soundSourceBigger.play();
 
 					paddleUpgrade[i][j].setPosition(-100, -100);
 					paddle.setSize(sf::Vector2f(2 * paddleWidth, paddleHeight));
 					paddle.setOrigin(sf::Vector2f(0.5 * paddle.getSize().x, 0.5 * paddle.getSize().y));
-					paddleUpgradeHitCounter = paddleUpgradeMaxHits;
+					paddleUpgradeHitCounter += paddleUpgradeMaxHits;
 					brickID[i][j] = 0;
 
 					std::cout << "paddle upgrade collected" << std::endl;
@@ -663,8 +702,8 @@ void App::Update() {
 					paddleParalyzed = true;
 					paralyzerActive[i][j] = false;
 
-					sound.setBuffer(paralyzedSound);
-					sound.play();
+					soundSourceParalyzed.setBuffer(paralyzedSound);
+					soundSourceParalyzed.play();
 
 					std::cout << "paddle is paralyzed " << paddleParalyzed << std::endl;
 				}
@@ -673,14 +712,25 @@ void App::Update() {
 	}
 
 	if (colouredBricksRemaining <= 0) {
+		colouredBricksRemaining = 1; //line to release this code from looping
 		isGame = false;
+
+		music.stop();
+		if (!music.openFromFile("ThemeMusic_mui_mus_2.00.wav")) {
+			std::cout << "ThemeMusic not loaded" << std::endl;
+		}
+		music.setLoop(true);
+		music.play();
+
 		ballSpeed = 0.0f;
 		ball.setPosition(initialBallPosition);
 		paddle.setPosition(initialPaddlePosition);
 		paddleParalyzed = false;
-		clockTime = 0.0f;
+		clockTime = 0.0f;		
 
 		if (isEditor == true) {
+			std::cout << "winner to editor" << std::endl;
+			
 			readSaveFile.open("tempSaveData.txt");
 			if (readSaveFile.is_open()) {
 
@@ -706,7 +756,7 @@ void App::Update() {
 			else {
 				std::cout << "unable to open file" << std::endl;
 			}
-		}
+		}		
 	}
 
 	if (isGame == true || isEditor == true) {
@@ -817,6 +867,14 @@ void App::HandleEvents() {
 	{
 		// R key is pressed: reset back to editor
 		isGame = false;
+
+		music.stop();
+		if (!music.openFromFile("ThemeMusic_mui_mus_2.00.wav")) {
+			std::cout << "ThemeMusic not loaded" << std::endl;
+		}
+		music.setLoop(true);
+		music.play();
+
 		ballSpeed = 0.0f;
 		ball.setPosition(initialBallPosition);
 		paddle.setPosition(initialPaddlePosition);
@@ -855,8 +913,8 @@ void App::HandleEvents() {
 					if (button[0].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 						isGame = true;
 
-						sound.setBuffer(buttonSound);
-						sound.play();
+						soundSourceButton.setBuffer(buttonSound);
+						soundSourceButton.play();
 
 						writeSaveFile.open("tempSaveData.txt");
 						if (writeSaveFile.is_open()) {
@@ -880,8 +938,8 @@ void App::HandleEvents() {
 					//mouse click position is in the save button
 					if (button[1].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 
-						sound.setBuffer(buttonSound);
-						sound.play();
+						soundSourceButton.setBuffer(buttonSound);
+						soundSourceButton.play();
 
 						writeSaveFile.open(targetFile);
 						if (writeSaveFile.is_open()) {
@@ -920,6 +978,9 @@ void App::HandleEvents() {
 					//mouse click position is in the back button
 					if (button[10].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 						isEditor = false;
+
+						soundSourceButton.setBuffer(backButtonSound);
+						soundSourceButton.play();
 					}
 
 					//mouse click position is in the + COL button
@@ -987,8 +1048,8 @@ void App::HandleEvents() {
 						if (menuButtons[0][0].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							targetFile = level1Save;
 
-							sound.setBuffer(buttonSound);
-							sound.play();
+							soundSourceButton.setBuffer(buttonSound);
+							soundSourceButton.play();
 
 							LoadLevel();
 
@@ -1000,8 +1061,8 @@ void App::HandleEvents() {
 						if (menuButtons[0][1].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							targetFile = level2Save;
 
-							sound.setBuffer(buttonSound);
-							sound.play();
+							soundSourceButton.setBuffer(buttonSound);
+							soundSourceButton.play();
 
 							LoadLevel();
 
@@ -1013,8 +1074,8 @@ void App::HandleEvents() {
 						if (menuButtons[0][2].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							targetFile = level3Save;
 
-							sound.setBuffer(buttonSound);
-							sound.play();
+							soundSourceButton.setBuffer(buttonSound);
+							soundSourceButton.play();
 
 							LoadLevel();
 
@@ -1026,8 +1087,8 @@ void App::HandleEvents() {
 						if (menuButtons[1][0].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							targetFile = custom1Save;
 
-							sound.setBuffer(buttonSound);
-							sound.play();
+							soundSourceButton.setBuffer(buttonSound);
+							soundSourceButton.play();
 
 							LoadLevel();
 							isEditor = true;
@@ -1037,8 +1098,8 @@ void App::HandleEvents() {
 						if (menuButtons[1][1].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							targetFile = custom2Save;
 
-							sound.setBuffer(buttonSound);
-							sound.play();
+							soundSourceButton.setBuffer(buttonSound);
+							soundSourceButton.play();
 
 							LoadLevel();
 							isEditor = true;
@@ -1048,8 +1109,8 @@ void App::HandleEvents() {
 						if (menuButtons[1][2].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							targetFile = custom3Save;
 
-							sound.setBuffer(buttonSound);
-							sound.play();
+							soundSourceButton.setBuffer(buttonSound);
+							soundSourceButton.play();
 
 							LoadLevel();
 							isEditor = true;
@@ -1059,14 +1120,17 @@ void App::HandleEvents() {
 						if (instructionButton.getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							instructionsOn = true;
 
-							sound.setBuffer(buttonSound);
-							sound.play();
+							soundSourceButton.setBuffer(buttonSound);
+							soundSourceButton.play();
 						}
 					}
 					else {
 						//mouse click position is in the back button
 						if (button[10].getGlobalBounds().contains(sf::Vector2f(localPosition))) {
 							instructionsOn = false;
+
+							soundSourceButton.setBuffer(backButtonSound);
+							soundSourceButton.play();
 						}
 					}
 				}
@@ -1207,6 +1271,14 @@ void App::CreateBrickArray() {
 }
 
 void App::StartGame() {
+	
+	music.stop();
+	if (!music.openFromFile("BattleTheme_stg_mus_v2.00.wav")) {
+		std::cout << "BattleTheme music not loaded" << std::endl;
+	}	
+	music.setLoop(true);
+	music.play();
+	
 	ballCount = maxBallCount;
 	ballCountIcon.setFillColor(brickFullHealthColour);
 	ballCountText.setString(std::to_string(ballCount));

@@ -149,14 +149,23 @@ private:
 	sf::Text			totalTime;
 
 	//sound variables
-	sf::Sound				sound;
+	sf::Sound				soundSourceBrickDestroy;
+	sf::Sound				soundSourcePaddleHit;
+	sf::Sound				soundSourceParalyzed;
+	sf::Sound				soundSourceBigger;
+	sf::Sound				soundSourceButton;
+	sf::Sound				soundSourceSolidHit;
 	sf::SoundBuffer			brickDestroyed;
 	sf::SoundBuffer			paddleHit;
 	sf::SoundBuffer			paralyzedSound;
 	sf::SoundBuffer			biggerSound;
 	sf::SoundBuffer			smallerSound;
 	sf::SoundBuffer			buttonSound;
+	sf::SoundBuffer			backButtonSound;
 	sf::SoundBuffer			solidHitSound;
+	sf::SoundBuffer			lostBallSound;
+
+	sf::Music				music;
 	
 
 
